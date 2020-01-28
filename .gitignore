@@ -1,0 +1,12 @@
+*.env
+node_modules/
+dist/
+*.pem
+.vscode/
+*.log
+slds_static_2_4_6
+mdapioutput
+mdapipkg
+_build
+_tmp
+.localdevserver
