@@ -5,6 +5,7 @@ const switchScratch = require('./switchScratch');
 const showLogs = require('./showLogs');
 const { runTestMethod, runTestClass } = require('./runTests');
 const { pullFromScratch, pushToScratch } = require('./scratchCode');
+const { showCurrent } = require('./scratchInfo');
 
 program
   .version('0.0.1')
@@ -20,6 +21,12 @@ program
   .command('log')
   .description('Show remote logs')
   .action(showLogs);
+
+program
+  .command('display')
+  .option('-m, --markdown', 'Generates MD code')
+  .description('Display current scratch org url')
+  .action(showCurrent);
 
 program
   .command('code')
