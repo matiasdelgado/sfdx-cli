@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const program = require('commander');
+const openScratch = require('./openScratch');
 const switchScratch = require('./switchScratch');
 const showLogs = require('./showLogs');
 const { runTestMethod, runTestClass } = require('./runTests');
@@ -10,6 +11,11 @@ const { showCurrent } = require('./scratchInfo');
 program
   .version('0.0.1')
   .usage('sfdx-cli <command> <options>');
+
+program
+  .command('open')
+  .description('Open the default scratch org in the browser')
+  .action(openScratch);
 
 program
   .command('switch')

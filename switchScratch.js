@@ -1,6 +1,8 @@
 const inquirer = require('inquirer');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const validateContext = require('./context');
+const openScratch = require('./openScratch');
 
 module.exports = switchScratch;
 
@@ -12,11 +14,26 @@ function switchScratch({ open }) {
       }`;
     });
 
+    if (choices.length === 0) {
+      console.info('There are no active scratch orgs');
+      return;
+    }
+
+    const contextOk = validateContext();
+    if (!contextOk) {
+      console.info('This folder is not a salesforce solution, cannot switch the scratch orgs.');
+      console.info('');
+      if (!open) {
+        choices.forEach(text => console.info(text));
+        return;
+      }
+    }
+
     const query = inquirer
       .prompt([
         {
           name: 'instanceUrl',
-          message: 'Choose the Scratch org:',
+          message: `${ contextOk ? 'Choose' : 'Open' } Scratch org:`,
           type: 'list',
           choices,
         },
@@ -25,17 +42,19 @@ function switchScratch({ open }) {
         const index = choices.indexOf(instanceUrl);
         const {username} = orgs[index];
 
-        const setCommand = `sfdx force:config:set defaultusername=${username}`;
-        const openCommand = 'sfdx force:org:open';
-        return exec(setCommand)
-          .then(() => {
-            if (open) {
-              process.stdout.write('Opening browser...'); // write message and do not add a CRLF
-              return exec(openCommand).then(() => process.stdout.write('\033[2K')); // remove line
-            }
-          })
-      });
+        return setDefaultIfPossible(username, contextOk).then(() => username);
+      })
+      .then(username => open && openScratch({ username }))
   });
+}
+
+function setDefaultIfPossible(username, contextOk) {
+  if (!contextOk) {
+    return Promise.resolve();
+  }
+
+  const setCommand = `sfdx force:config:set defaultusername=${username}`;
+  return exec(setCommand);
 }
 
 function getScratchOrgs() {
